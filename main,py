@@ -1,0 +1,42 @@
+import discord
+from discord.ext import commands
+
+import random
+
+# Bot setup
+intents = discord.Intents.all()
+intents.messages = True
+bot = commands.Bot(command_prefix='!', intents=intents)
+
+# Example quiz questions
+quiz_questions = [
+    {"question": "Apa output dari kode ini?\n```python\nprint(2 ** 3 ** 1)```", "answer": "8"},
+    {"question": "Apa yang akan dicetak oleh kode berikut?\n```python\nx = [1, 2, 3]\nprint(x[::-1])```", "answer": "[3, 2, 1]"},
+    {"question": "Apa tipe data dari hasil `type(3/2)` di Python?", "answer": "<class 'float'>"},
+    {"question": "Apa fungsi dari keyword `def` dalam Python?","answer": "mendefinisikan fungsi"},   
+    {"question": "Apa output dari kode ini?\n```python\nx = 'Hello'\nprint(x[1])```","answer": "e"},
+]
+
+@bot.event
+async def on_ready():
+    print(f'Logged in as {bot.user}')
+
+@bot.command()
+async def quiz(ctx):
+    question_data = random.choice(quiz_questions)
+    question = question_data["question"]
+    correct_answer = question_data["answer"]
+
+    await ctx.send(f"🧠 Quiz Time! First to answer correctly wins:\n**{question}**")
+
+    def check(m):
+        return m.channel == ctx.channel and m.content.lower() == correct_answer
+
+    try:
+        msg = await bot.wait_for('message', timeout=40.0, check=check)
+        await ctx.send(f"🎉 Correct! {msg.author.mention} got it right.")
+    except:
+        await ctx.send("⏰ Time's up! No correct answers.")
+
+# Replace "YOUR_BOT_TOKEN" with your bot's actual token
+bot.run('')
